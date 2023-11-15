@@ -9,14 +9,13 @@ from torch import distributed
 
 from modulus.distributed.manager import DistributedManager
 
-# from earth2mip import inference_ensemble
 from earth2mip.inference_ensemble import get_model, run_inference, get_initializer
 from earth2mip.schema import EnsembleRun
 
 base_config = {
-    "ensemble_members": 2,
+    "ensemble_members": 4,
     "noise_amplitude": 0.01,
-    "simulation_length": 4,
+    "simulation_length": 8,
     "weather_event": {
         "properties": {
             "name": "Globe",
@@ -42,8 +41,10 @@ base_config = {
                 ]
             },
             {
-                "name": "global",
-                "type": "Window",
+                "name": "eu_cities",
+                "type": "MultiPoint",
+                "lat": [48.75, 43.50],
+                "lon": [2.50, 5.25],
                 "diagnostics": [
                     {
                         "type": "raw",
@@ -56,7 +57,7 @@ base_config = {
             }
         ]
     },
-    "output_path": "../outputs/04_demo_notebook",
+    "output_path": "../outputs/05_demo_script",
     "output_frequency": 1,
     "seed": 12345,
     "use_cuda_graphs": False,
