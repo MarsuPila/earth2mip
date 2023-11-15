@@ -35,7 +35,7 @@ base_config = {
                         "type": "raw",
                         "channels": [
                             "t2m",
-                            "tcwv"
+                            "u10m"
                         ]
                     }
                 ]
@@ -50,14 +50,14 @@ base_config = {
                         "type": "raw",
                         "channels": [
                             "t2m",
-                            "tcwv"
+                            "u10m"
                         ]
                     }
                 ]
             }
         ]
     },
-    "output_path": "../outputs/05_demo_script",
+    # "output_path": "../outputs/05_demo_script",
     "output_frequency": 1,
     "seed": 12345,
     "use_cuda_graphs": False,
@@ -73,7 +73,19 @@ def download_model(model: str):
         print(f'set os variable before running script: $ export MODEL_REGISTRY=/path/to/model/registry')
     os.makedirs(model_registry, exist_ok=True)
 
-    if model == 'dlwp':
+    if model == 'pangu':
+        if not os.path.isdir(os.path.join(model_registry, 'pangu')):
+            pangu_registry = os.path.join(model_registry, "pangu")
+            os.makedirs(pangu_registry, exist_ok=True)
+            # Wget onnx files
+            print("Downloading model checkpoint, this may take a bit")
+            subprocess.run(['wget', '-nc', '-P', f'{pangu_registry}', 'https://get.ecmwf.int/repository/test-data/ai-models/pangu-weather/pangu_weather_24.onnx'], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            subprocess.run(['wget', '-nc', '-P', f'{pangu_registry}', 'https://get.ecmwf.int/repository/test-data/ai-models/pangu-weather/pangu_weather_6.onnx'], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+
+            with open(os.path.join(pangu_registry, 'metadata.json'), 'w') as outfile:
+                json.dump({"entrypoint": {"name": "earth2mip.networks.pangu:load"}}, outfile, indent=2)
+        return
+    elif model == 'dlwp':
         link = 'https://api.ngc.nvidia.com/v2/models/nvidia/modulus/modulus_dlwp_cubesphere/versions/v0.2/files/dlwp_cubesphere.zip'
     elif model == 'fcnv2_sm':
         link = 'https://api.ngc.nvidia.com/v2/models/nvidia/modulus/modulus_fcnv2_sm/versions/v0.2/files/fcnv2_sm.zip'
@@ -95,7 +107,9 @@ def run_demo():
     parser.add_argument("--model", default='dlwp', help='dlwp, fcnv2_sm', type=str)
     args = parser.parse_args()
 
-    config: EnsembleRun = EnsembleRun.parse_obj(base_config | {"weather_model": args.model})
+    model_config = {"weather_model": args.model,
+                    "output_path": f"../outputs/05_demo_script/{args.model}",}
+    config: EnsembleRun = EnsembleRun.parse_obj(base_config | model_config)
 
     # Set model registry as a local folder
     download_model(args.model)
