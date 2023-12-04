@@ -123,6 +123,7 @@ class Raw(Diagnostics):
         self, output: torch.Tensor, time_index: int, batch_id: int, batch_size: int
     ):
         for c, channel in enumerate(self.diagnostic.channels):
+            print(output.shape)
             self.subgroup[channel][batch_id : batch_id + batch_size, time_index] = (
                 output[:, c].cpu().numpy()
             )
