@@ -103,7 +103,7 @@ def parse_channel(channel: str) -> Union[PressureLevelCode, SingleLevelCode]:
 class DataSource:
     channel_names: List[str]
     client: Client = dataclasses.field(
-        default_factory=lambda: Client(progress=False, quiet=False)
+        default_factory=lambda: Client(progress=False, quiet=False, timeout=600, debug=True, verify=False)
     )
     _cache: Optional[str] = None
 
